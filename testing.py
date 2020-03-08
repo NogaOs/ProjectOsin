@@ -5,3 +5,6 @@ def testing_jinja():
     rendered_page = template.render(name='John Doe')  
     print(rendered_page)  
 
+def testing_git():
+    print("fggfdkjlgdfgkj")
+
