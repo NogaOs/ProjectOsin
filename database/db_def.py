@@ -2,7 +2,8 @@ from peewee import (
     AutoField, CharField, DateTimeField, ForeignKeyField,
     Model, PostgresqlDatabase, SqliteDatabase
 )
-from database.config import db
+
+from config.config import db
 
 import bcrypt
 
@@ -41,8 +42,8 @@ class Event(AppBaseModel):
     id = AutoField()
     name = CharField()
     date = DateTimeField(default=datetime.now)
-    comments = CharField(null=True)
     team = ForeignKeyField(Team, backref='events')
+    comments = CharField(null=True)
 
 
 class UserAssociation(AppBaseModel):
@@ -71,32 +72,6 @@ class Availability(AppBaseModel):
 #     aval = Availability.create(user_association=assoc, event=eventush)
 
 # db.close()
-
-
-def print_usernames():
-    usernames = []
-    db.connect()
-    for user in User.select():
-        usernames.append(user.full_name)
-    db.close()
-    return usernames
-
-
-def hash_password(user_paswd, salt):
-    user_paswd = bytes(user_paswd, 'utf-8')
-    hashed = bcrypt.hashpw(user_paswd, salt)
-    print(hashed, user_paswd, salt)
-    return hashed 
-    
-
-def add_user(user_name, user_mail, user_phone, user_password):
-    salt = bcrypt.gensalt()
-    db.connect()
-    User.create(
-        full_name=user_name, mail=user_mail, phone=user_phone, 
-        salt=salt, password=hash_password(user_password, salt)
-    ) 
-    db.close()
 
 
 

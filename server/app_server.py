@@ -1,76 +1,39 @@
-from database.db_def import add_user, hash_password, db, User
+from database.db_def import User, Event
 
-from database.funcs import print_usernames
+from database.funcs import add_event, add_user, user_login, get_user_info
 
-from flask import Flask, render_template, request, session, redirect, url_for
+from config.config import db, get_secret_key
+
+from flask import Flask, render_template, request, redirect, url_for, session
 
 from markupsafe import escape
 
 
 app = Flask(__name__)
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-
-# @app.route('/')
-# def welcomePage():
-#     return '<html><p style="color:blue">I am the main page!</p></html>'
-
-
-@app.route('/users/list')
-def usersList():
-    username_list = print_usernames()
-    return '''
-    <table style="width:100%">
-    <tr>
-    <th>name</th>
-    </tr>
-    {% for username in username_list %}
-    <tr>
-        <td>{{username}}</td>
-    </tr>
-    {% endfor %}
-    </table>
-    '''
+app.secret_key = b'\xa8\xa3\xf1T#*\xeb1\xbd[Jyz\nX\x0e$\x06\xc6\xf5#~p\xd8'
 
 
 @app.route('/')
 def index():
     if 'username' in session:
         return 'Logged in as %s' % escape(session['username'])
-    return 'You are not logged in'
+    return 'you are not logged in, yet.'
 
-# if (hmac_hash("sha256", $_POST['password'], $saltFromDatabase) === $hashFromDatabase)
-#     $login = true;
 
-# def hash_password(user_paswd, salt):
-#     user_paswd = bytes(user_paswd, 'utf-8')
-#     hashed = bcrypt.hashpw(user_paswd, salt)
-#     print(hashed, user_paswd, salt)
-#     return hashed 
+@app.route('/users/list')
+def users_list():
+    users_info = get_user_info()
+    return render_template('users_list.html', items=users_info)
 
-# def print_usernames():
-#     db.connect()
-#     query = User.select()
-#     for user in query:
-#         print(user.full_name)
-#     db.close()
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('full_name') 
         password = request.form.get('password') 
-        db.connect()
-        User.get(User.full_name == username)
-        db.close()
-        if hash_password(password, User.salt) == User.password:
-            session['full_name'] = request.form['full_name']
-            return redirect(url_for('index'))
-    return '''
-        <form method="post">
-            <p><input type=text name=full_name></p><br>
-            <p><input type=text name=password></p>
-            <p><input type=submit value=Login></p>
-        </form>
-    '''
+        user_login(username, password)
+    return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
@@ -80,7 +43,7 @@ def logout():
 
 
 @app.route('/users/add', methods=["GET", "POST"]) 
-def addUser():
+def web_add_user():
     # in case the user pressed submit on the form
     if request.method == 'POST':  
         name = request.form.get('name')
@@ -88,5 +51,15 @@ def addUser():
         phone = request.form.get('phone')
         password = request.form.get("password")
         add_user(name, email, phone, password)
-        
     return render_template('add_user.html')
+
+
+@app.route('/events/add', methods=["GET", "POST"]) 
+def web_add_event():
+    if request.method == 'POST':  
+        name = request.form.get('event_name')
+        date = request.form.get('event_date')
+        organized_by = request.form.get('team')
+        comments = request.form.get('comments')
+        add_event(name, date, organized_by, comments)
+    return render_template('add_event.html')
