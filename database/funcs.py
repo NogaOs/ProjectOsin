@@ -48,8 +48,8 @@ def user_login(user_name, user_password):
     #     return 'login unsuccessfulllll.'
         # raise SyntaxError ('Username or password is invalid.')
     if hash_password(user_password, salt) == bytes(user.password, 'utf-8'):
+        # return user.id, user_name
         session['id'] = user.id
         session['user_name'] = user_name
-        return redirect(url_for('index'))
     return 'login unsuccessful.' # search for 401
 
