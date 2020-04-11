@@ -1,6 +1,6 @@
 import bcrypt
 
-from config.config import db
+from my_config.config import db
 
 from database.db_def import User, Event
 
@@ -14,18 +14,17 @@ def get_user_info():
     return users_info
 
 
-def hash_password(user_paswd, salt):
+def hash_password(user_paswd):
+    salt = bcrypt.gensalt()
     user_paswd = bytes(user_paswd, 'utf-8')
-    hashed = bcrypt.hashpw(user_paswd, salt)
-    return hashed 
+    return bcrypt.hashpw(user_paswd, salt)
     
 
 def add_user(user_name, user_mail, user_phone, user_password):
-    salt = bcrypt.gensalt()
     db.connect()
     User.create(
         full_name=user_name, mail=user_mail, phone=user_phone, 
-        salt=salt, password=hash_password(user_password, salt)
+        password=hash_password(user_password)
     ) 
     db.close()
 
@@ -43,13 +42,7 @@ def user_login(user_name, user_password):
     db.connect()
     user = User.get(User.full_name == user_name)
     db.close()
-    salt = bytes(user.salt, 'utf-8') 
-    # if not bcrypt.checkpw(user_password, user.password):
-    #     return 'login unsuccessfulllll.'
-        # raise SyntaxError ('Username or password is invalid.')
-    if hash_password(user_password, salt) == bytes(user.password, 'utf-8'):
-        # return user.id, user_name
-        session['id'] = user.id
-        session['user_name'] = user_name
-    return 'login unsuccessful.' # search for 401
+    if bcrypt.checkpw(bytes(user_password, 'utf-8'), bytes(user.password, 'utf-8')):
+        return user.id, user_name
+    return False
 

@@ -3,8 +3,8 @@ from peewee import (
     Model, PostgresqlDatabase, SqliteDatabase
 )
 
-from config.config import db
 
+# from my_config.config import db
 import bcrypt
 
 from datetime import datetime
@@ -14,7 +14,12 @@ from datetime import datetime
 
 class AppBaseModel(Model):
     class Meta: 
-        database = db
+        # database = db
+        db = PostgresqlDatabase(
+        'scheduleDB', 
+        user='noga_osin', 
+        password='correctNogaZokLamba', 
+        host='schedule-db.clhrtwy2vi9q.us-east-2.rds.amazonaws.com', port=5432)
 
 class User(AppBaseModel):
     id = AutoField()
@@ -23,7 +28,6 @@ class User(AppBaseModel):
     mail = CharField()
     password = CharField()
     phone = CharField(null=True)
-    salt = CharField()
 
 
 class Team(AppBaseModel):
@@ -60,18 +64,18 @@ class Availability(AppBaseModel):
     event = ForeignKeyField(Event)
 
 
-# db.connect()
-# if __name__ == '__main__':
-#     db.drop_tables([User, Team, Role, Event, Availability, UserAssociation])
-#     db.create_tables([User, Team, Role, Event, Availability, UserAssociation])
-#     noga = User.create(full_name="Noga Osin", mail="test@test.com", salt=bcrypt.gensalt(), password="veryshushu") 
-#     nogasTeam = Team.create(name="Nogas team")
-#     eventush = Event.create(name = "Motherlovhiffing international day", team=nogasTeam)
-#     nossaNova = Role.create(name="DJ")
-#     assoc = UserAssociation.create(user=noga, team=nogasTeam, role=nossaNova)
-#     aval = Availability.create(user_association=assoc, event=eventush)
+db.connect()
+if __name__ == '__main__':
+    db.drop_tables([User, Team, Role, Event, Availability, UserAssociation])
+    db.create_tables([User, Team, Role, Event, Availability, UserAssociation])
+    noga = User.create(full_name="Noga Osin", mail="test@test.com", salt=bcrypt.gensalt(), password="veryshushu") 
+    nogasTeam = Team.create(name="Nogas team")
+    eventush = Event.create(name = "Motherlovhiffing international day", team=nogasTeam)
+    nossaNova = Role.create(name="DJ")
+    assoc = UserAssociation.create(user=noga, team=nogasTeam, role=nossaNova)
+    aval = Availability.create(user_association=assoc, event=eventush)
 
-# db.close()
+db.close()
 
 
 

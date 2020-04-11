@@ -31,8 +31,12 @@ def login():
     if request.method == 'POST':
         username = request.form.get('full_name') 
         password = request.form.get('password') 
-        user_login(username, password)
-        return redirect(url_for('index'))
+        if user_login(username, password):
+            user_id, user_name = user_login(username, password)
+            session['id'] = user_id
+            session['username'] = user_name
+            return redirect(url_for('index'))
+        return 'login failed.'
     return render_template('login.html')
 
 
